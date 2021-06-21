@@ -16,10 +16,6 @@ public class Coordinates implements Serializable {
         return "{" + x + ", " + y + "}";
     }
 
-    public String toStringForCSV() {
-        return x + "," + y;
-    }
-
     public Double getX() {
         return x;
     }

@@ -1,21 +1,11 @@
-package commands;
+package core;
 
 import collection.*;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.Scanner;
 import java.util.Stack;
 
 public class Creator {
-    private static LinkedHashSet<Product> collection = new LinkedHashSet<>();
-    private static ArrayList<Organization> organizations = new ArrayList<>();
-
-    public static void setProperties(LinkedHashSet<Product> collection, ArrayList<Organization> organizations) {
-        Creator.collection = collection;
-        Creator.organizations = organizations;
-    }
-
     public static Product createProduct(Product product, boolean isInteractive) {
         Stack<String> errors = new Stack<>();
         String name;
@@ -244,7 +234,7 @@ public class Creator {
         while (true) {
             try {
                 if (isInteractive) {
-                    System.out.println("Введите тип компании-производителя (пустая строка, "+OrganizationType.valueList()+"):");
+                    System.out.println("Введите тип компании-производителя (пустая строка, " + OrganizationType.valueList() + "):");
                     Scanner in = new Scanner(System.in);
                     String s = in.nextLine();
                     if (!s.equals("")) {
@@ -258,7 +248,7 @@ public class Creator {
                     }
                 }
             } catch (IllegalArgumentException e) {
-                errors.push("Неправильный ввод типа компании-производителя! Возможные варианты ввода: пустая строка, "+OrganizationType.valueList()+".");
+                errors.push("Неправильный ввод типа компании-производителя! Возможные варианты ввода: пустая строка, " + OrganizationType.valueList() + ".");
                 if (isInteractive) {
                     System.out.println(errors.pop());
                     continue;
@@ -267,8 +257,8 @@ public class Creator {
             break;
         }
         if (errors.isEmpty()) {
-            Organization manufacturer = new Organization(manufacturerName, annualTurnover, employeesCount, type, organizations);
-            return new Product(name, new Coordinates(x,y), price, partNumber, manufactureCost, unitOfMeasure, manufacturer, collection);
+            Organization manufacturer = new Organization(manufacturerName, annualTurnover, employeesCount, type);
+            return new Product(name, new Coordinates(x, y), price, partNumber, manufactureCost, unitOfMeasure, manufacturer);
         } else {
             System.out.println("Возникли следующие ошибки:");
             errors.forEach(System.out::println);
@@ -350,7 +340,7 @@ public class Creator {
         while (true) {
             try {
                 if (isInteractive) {
-                    System.out.println("Введите тип компании-производителя (пустая строка, "+OrganizationType.valueList()+"):");
+                    System.out.println("Введите тип компании-производителя (пустая строка, " + OrganizationType.valueList() + "):");
                     Scanner in = new Scanner(System.in);
                     String s = in.nextLine();
                     if (!s.equals("")) {
@@ -360,7 +350,7 @@ public class Creator {
                     type = manufacturer.getType();
                 }
             } catch (IllegalArgumentException e) {
-                errors.push("Неправильный ввод типа компании-производителя! Возможные варианты ввода: пустая строка, "+OrganizationType.valueList()+".");
+                errors.push("Неправильный ввод типа компании-производителя! Возможные варианты ввода: пустая строка, " + OrganizationType.valueList() + ".");
                 if (isInteractive) {
                     System.out.println(errors.pop());
                     continue;
@@ -369,7 +359,7 @@ public class Creator {
             break;
         }
         if (errors.isEmpty()) {
-            return new Organization(name,annualTurnover,employeesCount,type,organizations);
+            return new Organization(name, annualTurnover, employeesCount, type);
         } else {
             System.out.println("Возникли следующие ошибки:");
             errors.forEach(System.out::println);

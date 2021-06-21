@@ -2,6 +2,7 @@ package commands;
 
 import collection.Organization;
 import collection.Product;
+import core.DBUnit;
 
 import java.util.*;
 
@@ -19,10 +20,10 @@ public class Help extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history) {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
         StringBuilder s = new StringBuilder();
         commands.forEach((commandName, command) -> s.append("\n\t").append(commandName).append(" - ").append(command.description()));
-        return "Список допустимых команд:" + s.toString();
+        return "Список допустимых команд:" + s;
     }
 
     @Override

@@ -4,6 +4,8 @@ import collection.Organization;
 import collection.Product;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import core.Creator;
+import core.DBUnit;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -47,13 +49,13 @@ public class FilterByManufacturer extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history) {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
         StringBuilder s = new StringBuilder();
         collection.stream().filter(x -> x.getManufacturer().equals(manufacturer)).forEach(x -> s.append("\n").append(x));
         if (s.toString().isEmpty()) {
             return "В коллекции нет элементов с manufacturer " + manufacturer + "!";
         } else {
-            return "Элементы коллекции с manufacturer " + manufacturer + ":" + s.toString();
+            return "Элементы коллекции с manufacturer " + manufacturer + ":" + s;
         }
     }
 

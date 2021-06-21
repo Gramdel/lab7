@@ -4,6 +4,8 @@ import collection.Organization;
 import collection.Product;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import core.Creator;
+import core.DBUnit;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -47,28 +49,41 @@ public class AddIfMax extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history) {
-        try {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
+        if (!collection.isEmpty()) {
             if (product.getPrice() >= collection.stream().max(Product.byPriceComparator).get().getPrice()) {
-                if (organizations.contains(product.getManufacturer())) {
-                    for (Organization o : organizations) {
-                        if (o.equals(product.getManufacturer())) {
-                            product.setManufacturer(o);
-                            break;
-                        }
+                product.createId(collection);
+                if (dbUnit.addProductToDB(product)) {
+                    Optional<Organization> optional = organizations.stream().filter(x -> x.equals(product.getManufacturer())).findAny();
+                    if (optional.isPresent()) {
+                        product.setManufacturer(optional.get());
+                    } else {
+                        product.getManufacturer().createId(organizations);
+                        organizations.add(product.getManufacturer());
                     }
+                    collection.add(product);
+                    return "Элемент успешно добавлен, т.к. его цена - наибольшая в коллекции!";
                 } else {
-                    product.getManufacturer().createId();
+                    return "Несмотря на то, что цена элемента - наибольшая, он не был добавлен из-за ошибка SQL!";
+                }
+            } else {
+                return "Элемент не добавлен, т.к. его цена - НЕ наибольшая в коллекции.";
+            }
+        } else {
+            product.createId(collection);
+            if (dbUnit.addProductToDB(product)) {
+                Optional<Organization> optional = organizations.stream().filter(x -> x.equals(product.getManufacturer())).findAny();
+                if (optional.isPresent()) {
+                    product.setManufacturer(optional.get());
+                } else {
+                    product.getManufacturer().createId(organizations);
                     organizations.add(product.getManufacturer());
                 }
-                product.createId();
                 collection.add(product);
-                return "Элемент добавлен в коллекцию, т.к. его цена - наибольшая в коллекции!";
+                return "Элемент добавлен в коллекцию вне зависимости от цены, потому что коллекция пуста!";
             } else {
-                return "Элемент не добавлен в коллекцию, т.к. его цена - НЕ наибольшая в коллекции.";
+                return "Несмотря на то, что цена элемента - наибольшая (коллекция пуста), он не был добавлен из-за ошибка SQL!";
             }
-        } catch (NoSuchElementException e) {
-            return "Элемент добавлен в коллекцию вне зависимости от цены, потому что коллекция пуста!";
         }
     }
 

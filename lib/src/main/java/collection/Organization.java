@@ -4,19 +4,17 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class Organization implements Serializable {
-    private Integer id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private final String name; //Поле не может быть null, Строка не может быть пустой
     private final Long annualTurnover; //Поле может быть null, Значение поля должно быть больше 0
     private final Long employeesCount; //Поле может быть null, Значение поля должно быть больше 0
     private final OrganizationType type; //Поле может быть null
-    private ArrayList<Organization> organizations = new ArrayList<>();
+    private Integer id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
 
-    public Organization(String name, Long annualTurnover, Long employeesCount, OrganizationType type, ArrayList<Organization> organizations) {
+    public Organization(String name, Long annualTurnover, Long employeesCount, OrganizationType type) {
         this.name = name;
         this.annualTurnover = annualTurnover;
         this.employeesCount = employeesCount;
         this.type = type;
-        this.organizations = organizations;
     }
 
     @Override
@@ -32,7 +30,7 @@ public class Organization implements Serializable {
                 return false;
             }
         } else {
-            if (o.annualTurnover == null || !annualTurnover.equals(o.annualTurnover)){
+            if (o.annualTurnover == null || !annualTurnover.equals(o.annualTurnover)) {
                 return false;
             }
         }
@@ -42,7 +40,7 @@ public class Organization implements Serializable {
                 return false;
             }
         } else {
-            if (o.employeesCount == null || !employeesCount.equals(o.employeesCount)){
+            if (o.employeesCount == null || !employeesCount.equals(o.employeesCount)) {
                 return false;
             }
         }
@@ -52,7 +50,7 @@ public class Organization implements Serializable {
                 return false;
             }
         } else {
-            if (o.type == null || !type.equals(o.type)){
+            if (o.type == null || !type.equals(o.type)) {
                 return false;
             }
         }
@@ -63,10 +61,6 @@ public class Organization implements Serializable {
     @Override
     public String toString() {
         return "{" + id + ", " + name + ", " + annualTurnover + ", " + employeesCount + ", " + type + "}";
-    }
-
-    public String toStringForCSV() {
-        return name + "," + (annualTurnover == null ? "" : annualTurnover) + "," + (employeesCount == null ? "" : employeesCount) + "," + (type == null ? "" : type) + "\n";
     }
 
     public String getName() {
@@ -85,7 +79,7 @@ public class Organization implements Serializable {
         return type;
     }
 
-    public void createId() {
+    public void createId(ArrayList<Organization> organizations) {
         Integer id = 1;
         boolean isUnique;
         do {

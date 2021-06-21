@@ -4,6 +4,8 @@ import collection.Organization;
 import collection.Product;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import core.Creator;
+import core.DBUnit;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -65,32 +67,31 @@ public class Update extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history) {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
         if (collection.stream().noneMatch(x -> x.getId().equals(id))) {
             return "Нечего обновлять: элемента с id " + id + " нет в коллекции!";
         } else {
-            Product product = collection.stream().filter(x -> x.getId().equals(id)).findFirst().get();
-            if (!product.getManufacturer().equals(this.product.getManufacturer())) {
-                if (collection.stream().filter(x -> x.getManufacturer().equals(product.getManufacturer())).count() == 1) {
-                    organizations.remove(product.getManufacturer());
-                }
-                if (organizations.contains(this.product.getManufacturer())) {
-                    for (Organization o : organizations) {
-                        if (o.equals(this.product.getManufacturer())) {
-                            this.product.setManufacturer(o);
-                            break;
-                        }
+            product.setId(id);
+            if (dbUnit.updateProductInDB(product)) {
+                Product product = collection.stream().filter(x -> x.getId().equals(id)).findAny().get();
+                if (!product.getManufacturer().equals(this.product.getManufacturer())) {
+                    if (collection.stream().filter(x -> x.getManufacturer().equals(product.getManufacturer())).count() == 1) {
+                        organizations.remove(product.getManufacturer());
                     }
-                } else {
-                    this.product.getManufacturer().createId();
-                    organizations.add(this.product.getManufacturer());
+                    Optional<Organization> optional = organizations.stream().filter(x -> x.equals(this.product.getManufacturer())).findAny();
+                    if (optional.isPresent()) {
+                        this.product.setManufacturer(optional.get());
+                    } else {
+                        this.product.getManufacturer().createId(organizations);
+                        organizations.add(product.getManufacturer());
+                    }
                 }
+                collection.remove(product);
+                collection.add(this.product);
+                return "Элемент c id " + id + " успешно обновлён!";
+            } else {
+                return "При обновлении элемента с id " + id + " возникла ошибка SQL!";
             }
-            collection.remove(product);
-            this.product.setId(id);
-            collection.add(this.product);
-            System.out.println("\t" + organizations);
-            return "Элемент c id " + id + " успешно обновлён!";
         }
     }
 

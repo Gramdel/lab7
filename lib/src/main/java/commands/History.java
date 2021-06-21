@@ -2,6 +2,7 @@ package commands;
 
 import collection.Organization;
 import collection.Product;
+import core.DBUnit;
 
 import java.util.*;
 
@@ -16,11 +17,11 @@ public class History extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history) {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
         if (history.size() > 0) {
             StringBuilder s = new StringBuilder();
             history.forEach(x -> s.append("\n\t").append(x));
-            return "Комманда history выполнена, последние 7 комманд:" + s.toString();
+            return "Комманда history выполнена, последние 7 комманд:" + s;
         } else {
             return "Список выполненных комманд пуст!";
         }

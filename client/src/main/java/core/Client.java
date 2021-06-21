@@ -1,7 +1,6 @@
 package core;
 
 import commands.Command;
-import commands.Interpreter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -39,7 +38,7 @@ public class Client extends Thread {
             try {
                 SocketAddress address = new InetSocketAddress(getArgs()[0], Integer.parseInt(getArgs()[1]));
                 DatagramSocket socket = new DatagramSocket();
-                socket.setSoTimeout(10000);
+                socket.setSoTimeout(5000);
                 DatagramPacket packet = new DatagramPacket(b, b.length, address);
                 socket.send(packet);
                 getLogger().log(Level.INFO,"Команда "+command.getClass().getSimpleName()+" успешно отправлена на сервер "+getArgs()[0]+":"+getArgs()[1]+"!");

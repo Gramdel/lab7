@@ -1,7 +1,8 @@
-package commands;
+package core;
 
 import collection.Organization;
 import collection.Product;
+import commands.*;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -11,12 +12,13 @@ import java.util.regex.Pattern;
 
 public class Interpreter implements Serializable {
     private static final HashMap<String, Command> commands = new HashMap<>();
-    private static LinkedHashSet<Product> collection = new LinkedHashSet<>();
-    private static ArrayList<Organization> organizations = new ArrayList<>();
-    private static Date date;
-    private static Stack<String> history = new Stack<>();
     private static boolean mode = false;
     private static Command command;
+    private static LinkedHashSet<Product> collection;
+    private static ArrayList<Organization> organizations;
+    private static Date date;
+    private static Stack<String> history;
+    private static DBUnit dbUnit;
 
     static {
         commands.put("add", new Add());
@@ -36,19 +38,8 @@ public class Interpreter implements Serializable {
         commands.put("remove_greater", new RemoveGreater());
     }
 
-    public static void setProperties(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history){
-        Interpreter.collection = collection;
-        Interpreter.organizations = organizations;
-        Interpreter.date = date;
-        Interpreter.history = history;
-    }
-
     public static void switchMode() {
         mode = !mode;
-    }
-
-    public static void addCommand(String name, Command command){
-        commands.put(name, command);
     }
 
     public static void fromStream(InputStream stream) {
@@ -67,12 +58,14 @@ public class Interpreter implements Serializable {
                 if (m.find()) {
                     arg = m.replaceFirst("");
                 }
-                addToHistory(com, history);
+                if (mode) {
+                    addToHistory(com);
+                }
                 Command command = commands.get(com);
                 if (command != null) {
                     if (command.prepare(arg, stream.equals(System.in), commands)) {
                         if (mode) {
-                            System.out.println(command.execute(collection, organizations, date, history));
+                            System.out.println(command.execute(collection, organizations, date, history, dbUnit));
                         } else {
                             Interpreter.command = command;
                         }
@@ -84,16 +77,24 @@ public class Interpreter implements Serializable {
         }
     }
 
-    public static Command getCommand() {
-        return command;
+    public static void addToHistory(String com) {
+        history.add(com);
+        if (history.size() > 7) history.removeElementAt(0);
     }
 
     public static void setCommand(Command command) {
         Interpreter.command = command;
     }
 
-    public static void addToHistory(String com, Stack<String> history) {
-        history.add(com);
-        if (history.size() > 7) history.removeElementAt(0);
+    public static Command getCommand() {
+        return command;
+    }
+
+    public static void setProperties(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
+        Interpreter.collection = collection;
+        Interpreter.organizations = organizations;
+        Interpreter.date = date;
+        Interpreter.history = history;
+        Interpreter.dbUnit = dbUnit;
     }
 }

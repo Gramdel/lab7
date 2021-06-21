@@ -2,6 +2,8 @@ package commands;
 
 import collection.Organization;
 import collection.Product;
+import core.DBUnit;
+import core.Interpreter;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -42,7 +44,7 @@ public class ExecuteScript extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history) {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
         return "Скрипт из файла " + arg + " выполнен!";
     }
 

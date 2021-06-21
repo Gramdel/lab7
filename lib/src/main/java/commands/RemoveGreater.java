@@ -4,6 +4,8 @@ import collection.Organization;
 import collection.Product;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import core.Creator;
+import core.DBUnit;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -27,7 +29,6 @@ public class RemoveGreater extends Command {
                     Matcher m = Pattern.compile("\\{.*}").matcher(arg);
                     if (m.find()) {
                         product = new Gson().fromJson(m.group(), Product.class);
-                        product.getManufacturer().createId();
                     }
                 }
             }
@@ -48,25 +49,30 @@ public class RemoveGreater extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history) {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
         int prevSize = collection.size();
         if (prevSize == 0) {
             return "Т.к. коллекция пуста, невозможно удалить из неё элементы, цена которых больше цены данного.";
         } else {
+            StringBuilder s = new StringBuilder();
             for (Iterator<Product> iter = collection.iterator(); iter.hasNext(); ) {
                 Product product = iter.next();
                 if (this.product.getPrice() < product.getPrice()) {
-                    if (collection.stream().filter(x -> x.getManufacturer().equals(product.getManufacturer())).count() == 1) {
-                        organizations.remove(product.getManufacturer());
+                    if (dbUnit.removeProductFromDB(product)) {
+                        if (collection.stream().filter(x -> x.getManufacturer().equals(product.getManufacturer())).count() == 1) {
+                            organizations.remove(product.getManufacturer());
+                        }
+                        iter.remove();
+                    } else {
+                        s.append("При удалении элемента с id ").append(product.getId()).append(" произошла ошибка SQL!\n");
                     }
-                    iter.remove();
                 }
             }
-            collection.stream().filter(x -> x.getPrice() > product.getPrice()).forEach(collection::remove);
+            //collection.stream().filter(x -> x.getPrice() > product.getPrice()).forEach(collection::remove);
             if (prevSize > collection.size()) {
-                return "Элементы, цена которых больше цены данного, успешно удалены!";
+                return s + "Элементы, цена которых больше цены данного, успешно удалены!";
             } else {
-                return "В коллекции нет элементов, цена которых больше цены данного, ничего не удалено.";
+                return s + "Ничего не удалено, т.к. в коллекции нет элементов, цена которых больше цены данного, или возникли ошибки!";
             }
         }
     }

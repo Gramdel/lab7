@@ -1,7 +1,5 @@
 package core;
 
-import commands.Interpreter;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.logging.LogManager;

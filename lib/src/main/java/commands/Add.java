@@ -4,6 +4,8 @@ import collection.Organization;
 import collection.Product;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import core.Creator;
+import core.DBUnit;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -47,21 +49,21 @@ public class Add extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history) {
-        if (organizations.contains(product.getManufacturer())) {
-            for (Organization o : organizations) {
-                if (o.equals(product.getManufacturer())) {
-                    product.setManufacturer(o);
-                    break;
-                }
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
+        product.createId(collection);
+        if (dbUnit.addProductToDB(product)) {
+            Optional<Organization> optional = organizations.stream().filter(x -> x.equals(product.getManufacturer())).findAny();
+            if (optional.isPresent()) {
+                product.setManufacturer(optional.get());
+            } else {
+                product.getManufacturer().createId(organizations);
+                organizations.add(product.getManufacturer());
             }
+            collection.add(product);
+            return "Элемент успешно добавлен!";
         } else {
-            product.getManufacturer().createId();
-            organizations.add(product.getManufacturer());
+            return "При добавлении элемента возникла ошибка SQL!";
         }
-        product.createId();
-        collection.add(product);
-        return "Элемент успешно добавлен в коллекцию!";
     }
 
     @Override

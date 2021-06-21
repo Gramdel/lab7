@@ -3,6 +3,7 @@ package commands;
 import collection.Organization;
 import collection.Product;
 import collection.UnitOfMeasure;
+import core.DBUnit;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -30,13 +31,21 @@ public class RemoveByUOM extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history) {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
         try {
             Product product = collection.stream().filter(x -> x.getUnitOfMeasure().equals(unitOfMeasure)).findAny().get();
             collection.remove(product);
-            return "Один из элементов с unitOfMeasure " + unitOfMeasure + " успешно удалён!";
+            if (dbUnit.removeProductFromDB(product)) {
+                if (collection.stream().filter(x -> x.getManufacturer().equals(product.getManufacturer())).count() == 1) {
+                    organizations.remove(product.getManufacturer());
+                }
+                return "Один из элементов с unitOfMeasure " + unitOfMeasure + " успешно удалён!";
+            } else {
+                collection.add(product);
+                return "При удалении элемента с unitOfMeasure " + unitOfMeasure + " произошла ошибка SQL!";
+            }
         } catch (NoSuchElementException e) {
-            return "Удаление невозможно, так как в коллекции нет элемента с unitOfMeasure " + unitOfMeasure + ".";
+            return "Удаление невозможно, так как в коллекции нет элементов с unitOfMeasure " + unitOfMeasure + "!";
         }
     }
 

@@ -2,6 +2,7 @@ package commands;
 
 import collection.Organization;
 import collection.Product;
+import core.DBUnit;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -17,7 +18,7 @@ public class Info extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history) {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
         return "Тип коллекции:\n" + collection.getClass() + "\n" + "Дата инициализации коллекции:\n" + new SimpleDateFormat("dd.MM.yyyy HH:mm").format(date) + "\n" + "Количество элементов коллекции:\n" + collection.size();
     }
 

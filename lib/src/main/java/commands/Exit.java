@@ -1,6 +1,6 @@
 package commands;
 
-import java.util.HashMap;
+import java.util.*;
 
 public class Exit extends Command {
     @Override

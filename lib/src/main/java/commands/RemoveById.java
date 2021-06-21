@@ -2,6 +2,7 @@ package commands;
 
 import collection.Organization;
 import collection.Product;
+import core.DBUnit;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -29,14 +30,19 @@ public class RemoveById extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history) {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
         try {
             Product product = collection.stream().filter(x -> x.getId().equals(id)).findFirst().get();
-            if (collection.stream().filter(x -> x.getManufacturer().equals(product.getManufacturer())).count() == 1) {
-                organizations.remove(product.getManufacturer());
-            }
             collection.remove(product);
-            return "Элемент с id " + id + " успешно удалён!";
+            if (dbUnit.removeProductFromDB(product)) {
+                if (collection.stream().filter(x -> x.getManufacturer().equals(product.getManufacturer())).count() == 1) {
+                    organizations.remove(product.getManufacturer());
+                }
+                return "Элемент с id " + id + " успешно удалён!";
+            } else {
+                collection.add(product);
+                return "При удалении элемента с id " + id + " произошла ошибка SQL!";
+            }
         } catch (NoSuchElementException e) {
             return "Удаление невозможно, так как в коллекции нет элемента с id " + id + ".";
         }

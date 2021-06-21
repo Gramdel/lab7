@@ -2,6 +2,7 @@ package commands;
 
 import collection.Organization;
 import collection.Product;
+import core.DBUnit;
 
 import java.util.*;
 
@@ -16,7 +17,7 @@ public class Clear extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history) {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
         if (collection.size() > 0) {
             collection.clear();
             return "Коллекция очищена.";
