@@ -31,5 +31,6 @@ public class Writer extends Thread {
         } catch (IOException e) {
             getLogger().log(Level.WARNING, "Ошибка отправки ответа!");
         }
+        Listener.listenPort();
     }
 }

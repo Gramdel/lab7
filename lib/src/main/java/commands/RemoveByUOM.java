@@ -32,19 +32,18 @@ public class RemoveByUOM extends Command {
 
     @Override
     public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
-        try {
-            Product product = collection.stream().filter(x -> x.getUnitOfMeasure().equals(unitOfMeasure)).findAny().get();
-            collection.remove(product);
-            if (dbUnit.removeProductFromDB(product)) {
-                if (collection.stream().filter(x -> x.getManufacturer().equals(product.getManufacturer())).count() == 1) {
-                    organizations.remove(product.getManufacturer());
+        Optional<Product> optional = collection.stream().filter(x -> x.getUnitOfMeasure().equals(unitOfMeasure)).findAny();
+        if (optional.isPresent()) {
+            if (dbUnit.removeProductFromDB(optional.get())) {
+                collection.remove(optional.get());
+                if (collection.stream().filter(x -> x.getManufacturer().equals(optional.get().getManufacturer())).count() == 1) {
+                    organizations.remove(optional.get().getManufacturer());
                 }
                 return "Один из элементов с unitOfMeasure " + unitOfMeasure + " успешно удалён!";
             } else {
-                collection.add(product);
                 return "При удалении элемента с unitOfMeasure " + unitOfMeasure + " произошла ошибка SQL!";
             }
-        } catch (NoSuchElementException e) {
+        } else {
             return "Удаление невозможно, так как в коллекции нет элементов с unitOfMeasure " + unitOfMeasure + "!";
         }
     }

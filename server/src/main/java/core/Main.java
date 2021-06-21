@@ -44,8 +44,8 @@ public class Main {
                 dbUnit.connect();
                 dbUnit.loadCollectionFromDB(collection, organizations);
 
-                if (setPort(args)) {
-                    Listener.listen(port);
+                if (setPort(args) && Listener.bind(port)) {
+                    Listener.listenPort();
                 }
 
                 System.out.println("Вас приветствует программа-сервер для управления коллекцией продуктов. Для получения списка команд введите help. \n" + "Введите команду:");

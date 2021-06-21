@@ -9,15 +9,21 @@ import java.util.logging.Level;
 import static core.Main.getLogger;
 
 public class Listener {
-    public static void listen(int port){
-        ExecutorService es = Executors.newFixedThreadPool(10);
-        //while(true) {
-            try {
-                es.execute(new Reader(new DatagramSocket(port)));
-            } catch (SocketException e) {
-                System.out.println("Не удалось запустить сервер на порте " + port + "!");
-                getLogger().log(Level.WARNING,"Не удалось запустить сервер на порте " + port + "!");
-            }
-        //}
+    private static final ExecutorService es = Executors.newFixedThreadPool(10);
+    private static DatagramSocket socket;
+
+    public static boolean bind(int port) {
+        try {
+            socket = new DatagramSocket(port);
+            return true;
+        } catch (SocketException e) {
+            System.out.println("Не удалось запустить сервер на порте " + port + "!");
+            getLogger().log(Level.WARNING,"Не удалось запустить сервер на порте " + port + "!");
+            return false;
+        }
+    }
+
+    public static void listenPort() {
+        es.execute(new Reader(socket));
     }
 }

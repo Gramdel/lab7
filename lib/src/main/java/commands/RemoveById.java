@@ -31,19 +31,18 @@ public class RemoveById extends Command {
 
     @Override
     public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
-        try {
-            Product product = collection.stream().filter(x -> x.getId().equals(id)).findFirst().get();
-            collection.remove(product);
-            if (dbUnit.removeProductFromDB(product)) {
-                if (collection.stream().filter(x -> x.getManufacturer().equals(product.getManufacturer())).count() == 1) {
-                    organizations.remove(product.getManufacturer());
+        Optional<Product> optional = collection.stream().filter(x -> x.getId().equals(id)).findFirst();
+        if (optional.isPresent()) {
+            if (dbUnit.removeProductFromDB(optional.get())) {
+                collection.remove(optional.get());
+                if (collection.stream().filter(x -> x.getManufacturer().equals(optional.get().getManufacturer())).count() == 1) {
+                    organizations.remove(optional.get().getManufacturer());
                 }
                 return "Элемент с id " + id + " успешно удалён!";
             } else {
-                collection.add(product);
                 return "При удалении элемента с id " + id + " произошла ошибка SQL!";
             }
-        } catch (NoSuchElementException e) {
+        } else {
             return "Удаление невозможно, так как в коллекции нет элемента с id " + id + ".";
         }
     }

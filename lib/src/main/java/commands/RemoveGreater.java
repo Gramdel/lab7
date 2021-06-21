@@ -68,7 +68,6 @@ public class RemoveGreater extends Command {
                     }
                 }
             }
-            //collection.stream().filter(x -> x.getPrice() > product.getPrice()).forEach(collection::remove);
             if (prevSize > collection.size()) {
                 return s + "Элементы, цена которых больше цены данного, успешно удалены!";
             } else {
