@@ -3,6 +3,8 @@ package core;
 import collection.*;
 
 import java.sql.*;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -30,17 +32,14 @@ public class DBUnit {
         connection = DriverManager.getConnection(url, username, password);
     }
 
-    public Connection getConnection() {
-        return connection;
-    }
-
     public void loadCollectionFromDB(LinkedHashSet<Product> collection, ArrayList<Organization> organizations) {
         System.out.println("Пытаемся загрузить коллекцию из базы данных...");
         try {
-            PreparedStatement statement = getConnection().prepareStatement("select * from lab7_collection");
+            PreparedStatement statement = connection.prepareStatement("select * from lab7_collection");
             ResultSet result = statement.executeQuery();
             while (result.next()) {
                 Product product = new Product(result.getString(2), new Coordinates(result.getDouble(3), result.getLong(4)), result.getFloat(5), result.getString(6), result.getFloat(7), UnitOfMeasure.fromString(result.getString(8)), new Organization(result.getString(9), result.getObject(10, Long.class), result.getObject(11, Long.class), result.getString(12) == null ? null : OrganizationType.fromString(result.getString(12))));
+                product.setCreationDate(ZonedDateTime.ofInstant(result.getTimestamp(13).toInstant(), ZoneId.of("GMT+3")));
                 if (Creator.createProduct(product, false) == null) {
                     System.out.println("Элемент с id " + result.getLong(1) + " не загружен из-за перечисленных выше ошибок формата данных!");
                 } else {
@@ -64,7 +63,7 @@ public class DBUnit {
 
     public boolean addProductToDB(Product product) {
         try {
-            PreparedStatement statement = getConnection().prepareStatement("insert into lab7_collection values (?,?,?,?,?,?,?,?,?,?,?,?)");
+            PreparedStatement statement = connection.prepareStatement("insert into lab7_collection values (?,?,?,?,?,?,?,?,?,?,?,?,?)");
             statement.setLong(1, product.getId());
             statement.setString(2, product.getName());
             statement.setDouble(3, product.getCoordinates().getX());
@@ -89,6 +88,7 @@ public class DBUnit {
             } catch (NullPointerException e) {
                 statement.setNull(12, NULL);
             }
+            statement.setTimestamp(13, Timestamp.from(product.getCreationDate().toInstant()));
             statement.executeUpdate();
             statement.close();
             return true;
@@ -100,7 +100,7 @@ public class DBUnit {
 
     public boolean updateProductInDB(Product product) {
         try {
-            PreparedStatement statement = getConnection().prepareStatement("update lab7_collection set name = ?, x = ?, y = ?, price = ?, \"partNumber\" = ?, \"manufactureCost\" = ?, \"unitOfMeasure\" = ?, \"manufacturerName\" = ?, \"annualTurnover\" = ?, \"employeesCount\" = ?, type = ? where id = " + product.getId());
+            PreparedStatement statement = connection.prepareStatement("update lab7_collection set name = ?, x = ?, y = ?, price = ?, \"partNumber\" = ?, \"manufactureCost\" = ?, \"unitOfMeasure\" = ?, \"manufacturerName\" = ?, \"annualTurnover\" = ?, \"employeesCount\" = ?, type = ? where id = " + product.getId());
             statement.setString(1, product.getName());
             statement.setDouble(2, product.getCoordinates().getX());
             statement.setLong(3, product.getCoordinates().getY());
@@ -135,7 +135,7 @@ public class DBUnit {
 
     public boolean removeProductFromDB(Product product) {
         try {
-            PreparedStatement statement = getConnection().prepareStatement("delete from lab7_collection where id = " + product.getId());
+            PreparedStatement statement = connection.prepareStatement("delete from lab7_collection where id = " + product.getId());
             statement.executeUpdate();
             statement.close();
             return true;

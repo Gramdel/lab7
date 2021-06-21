@@ -71,9 +71,10 @@ public class Update extends Command {
         if (collection.stream().noneMatch(x -> x.getId().equals(id))) {
             return "Нечего обновлять: элемента с id " + id + " нет в коллекции!";
         } else {
-            product.setId(id);
-            if (dbUnit.updateProductInDB(product)) {
+            this.product.setId(id);
+            if (dbUnit.updateProductInDB(this.product)) {
                 Product product = collection.stream().filter(x -> x.getId().equals(id)).findAny().get();
+                this.product.setCreationDate(product.getCreationDate());
                 if (!product.getManufacturer().equals(this.product.getManufacturer())) {
                     if (collection.stream().filter(x -> x.getManufacturer().equals(product.getManufacturer())).count() == 1) {
                         organizations.remove(product.getManufacturer());
