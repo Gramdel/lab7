@@ -10,10 +10,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class InterpreterForServer extends Interpreter {
-    private LinkedHashSet<Product> collection;
-    private ArrayList<Organization> organizations;
-    private Date date;
-    private DBUnit dbUnit;
+    private final LinkedHashSet<Product> collection;
+    private final ArrayList<Organization> organizations;
+    private final Date date;
+    private final DBUnit dbUnit;
+
+    public InterpreterForServer (LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, DBUnit dbUnit) {
+        this.collection = collection;
+        this.organizations = organizations;
+        this.date = date;
+        this.dbUnit = dbUnit;
+    }
 
     public void fromStream(InputStream stream, boolean isInteractive) {
         Scanner in = new Scanner(stream);
@@ -42,12 +49,5 @@ public class InterpreterForServer extends Interpreter {
                 }
             }
         }
-    }
-
-    public void setProperties(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, DBUnit dbUnit) {
-        this.collection = collection;
-        this.organizations = organizations;
-        this.date = date;
-        this.dbUnit = dbUnit;
     }
 }

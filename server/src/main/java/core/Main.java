@@ -56,8 +56,7 @@ public class Main {
                     listener.start();
                 }
 
-                InterpreterForServer interpreter = new InterpreterForServer();
-                interpreter.setProperties(collection,organizations,date,dbUnit);
+                InterpreterForServer interpreter = new InterpreterForServer(collection,organizations,date,dbUnit);
                 interpreter.fromStream(System.in, true);
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
