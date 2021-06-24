@@ -4,6 +4,7 @@ import collection.Organization;
 import collection.Product;
 import collection.UnitOfMeasure;
 import core.DBUnit;
+import core.Interpreter;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -13,7 +14,7 @@ public class RemoveByUOM extends Command {
     private UnitOfMeasure unitOfMeasure;
 
     @Override
-    public boolean prepare(String arg, boolean isInteractive, HashMap<String, Command> commands) {
+    public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {
         try {
             if (!arg.matches("\\s*[^\\s]+\\s*")) {
                 throw new IllegalArgumentException();
@@ -31,7 +32,7 @@ public class RemoveByUOM extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, DBUnit dbUnit) {
         Optional<Product> optional = collection.stream().filter(x -> x.getUnitOfMeasure().equals(unitOfMeasure)).findAny();
         if (optional.isPresent()) {
             if (dbUnit.removeProductFromDB(optional.get())) {

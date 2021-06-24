@@ -10,9 +10,9 @@ import java.util.logging.Level;
 import static core.Main.*;
 
 public class Writer extends Thread {
-    DatagramSocket socket;
-    DatagramPacket packet;
-    Command command;
+    private final DatagramSocket socket;
+    private DatagramPacket packet;
+    private final Command command;
 
     public Writer(DatagramSocket socket, DatagramPacket packet, Command command) {
         this.socket = socket;
@@ -23,14 +23,13 @@ public class Writer extends Thread {
     @Override
     public void run() {
         try {
-            String response = command.execute(getCollection(), getOrganizations(), getDate(), getHistory(), getDBUnit());
+            String response = command.execute(getCollection(), getOrganizations(), getDate(), getDBUnit());
             byte[] b = response.getBytes();
             packet = new DatagramPacket(b, b.length, packet.getAddress(), packet.getPort());
             socket.send(packet);
-            getLogger().log(Level.INFO, "Ответ успешно отправлен!");
+            getLogger().log(Level.INFO, "Ответ для клиента " + packet.getAddress().toString().substring(1) + " успешно отправлен!");
         } catch (IOException e) {
-            getLogger().log(Level.WARNING, "Ошибка отправки ответа!");
+            getLogger().log(Level.WARNING, "Ошибка отправки ответа клиенту " + packet.getAddress().toString().substring(1) + "!");
         }
-        Listener.listenPort();
     }
 }

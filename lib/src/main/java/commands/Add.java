@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import core.Creator;
 import core.DBUnit;
+import core.Interpreter;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -15,7 +16,7 @@ public class Add extends Command {
     private Product product;
 
     @Override
-    public boolean prepare(String arg, boolean isInteractive, HashMap<String, Command> commands) {
+    public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {
         Product product = null;
         try {
             if (isInteractive) {
@@ -49,7 +50,7 @@ public class Add extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, DBUnit dbUnit) {
         product.createId(collection);
         if (dbUnit.addProductToDB(product)) {
             Optional<Organization> optional = organizations.stream().filter(x -> x.equals(product.getManufacturer())).findAny();

@@ -17,7 +17,7 @@ public class ExecuteScript extends Command {
     private String arg;
 
     @Override
-    public boolean prepare(String arg, boolean isInteractive, HashMap<String, Command> commands) {
+    public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {
         if (!Files.exists(Paths.get(arg))) {
             System.out.println("Скрипта с именем " + arg + " не существует!");
         } else if (Files.isDirectory(Paths.get(arg))) {
@@ -32,7 +32,7 @@ public class ExecuteScript extends Command {
             try {
                 System.out.println("Скрипт из файла " + arg + " начинает выполняться...");
                 scripts.push(arg);
-                Interpreter.fromStream(new BufferedInputStream(new FileInputStream(arg)));
+                interpreter.fromStream(new BufferedInputStream(new FileInputStream(arg)), false);
                 this.arg = arg;
                 scripts.remove(arg);
                 return true;
@@ -44,7 +44,7 @@ public class ExecuteScript extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, DBUnit dbUnit) {
         return "Скрипт из файла " + arg + " выполнен!";
     }
 

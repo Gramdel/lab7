@@ -1,10 +1,12 @@
 package commands;
 
+import core.Interpreter;
+
 import java.util.*;
 
 public class Exit extends Command {
     @Override
-    public boolean prepare(String arg, boolean isInteractive, HashMap<String, Command> commands) {
+    public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {
         if (!arg.matches("\\s*")) {
             System.out.println("У команды exit не может быть аргументов!");
             return false;

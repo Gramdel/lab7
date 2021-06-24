@@ -12,21 +12,19 @@ import java.util.logging.Level;
 import static core.Main.getLogger;
 
 public class Reader extends Thread{
-    DatagramSocket socket;
+    private final DatagramSocket socket;
+    private final DatagramPacket packet;
+    private final byte[] b;
 
-    public Reader(DatagramSocket socket) {
+    public Reader(DatagramSocket socket, DatagramPacket packet, byte[] b) {
         this.socket = socket;
+        this.packet = packet;
+        this.b = b;
     }
 
     @Override
     public void run() {
         try {
-            byte[] b = new byte[10000];
-            DatagramPacket packet = new DatagramPacket(b, b.length);
-
-            socket.receive(packet);
-            getLogger().log(Level.INFO, "Получен пакет от клиента " + packet.getAddress());
-
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(b);
             ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
             Command command = (Command) objectInputStream.readObject();

@@ -13,7 +13,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 public class Main {
-    private static Logger logger = Logger.getLogger(Main.class.getName());
+    private static Logger logger;
     private static String url;
     private static String username;
     private static String password;
@@ -23,6 +23,7 @@ public class Main {
     private static Date date;
     private static final Stack<String> history = new Stack<>();
     private static DBUnit dbUnit;
+    private static Listener listener;
 
     public static void main(String[] args) {
         if (setConnectionDetails(args)) {
@@ -38,20 +39,26 @@ public class Main {
             } catch (IOException e) {
                 System.out.println("Не удалось инициализировать логгер!");
             }
+
             date = new Date();
             dbUnit = new DBUnit(url, username, password, logger);
             try {
                 dbUnit.connect();
                 dbUnit.loadCollectionFromDB(collection, organizations);
 
-                if (setPort(args) && Listener.bind(port)) {
-                    Listener.listenPort();
+                if (setPort(args)) {
+                    if (!(listener = new Listener()).bind(port)) {
+                        listener = null;
+                    }
+                }
+                System.out.println("Вас приветствует программа-сервер для управления коллекцией продуктов. Для получения списка команд введите help. \n" + "Введите команду:");
+                if (listener != null) {
+                    listener.start();
                 }
 
-                System.out.println("Вас приветствует программа-сервер для управления коллекцией продуктов. Для получения списка команд введите help. \n" + "Введите команду:");
-                Interpreter.setProperties(collection,organizations,date,history,dbUnit);
-                Interpreter.switchMode();
-                Interpreter.fromStream(System.in);
+                InterpreterForServer interpreter = new InterpreterForServer();
+                interpreter.setProperties(collection,organizations,date,dbUnit);
+                interpreter.fromStream(System.in, true);
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
             }
@@ -106,20 +113,18 @@ public class Main {
             System.out.println("Пытаемся запустить сервер на порте "+args[1]+"...");
             try {
                 int port = Integer.parseInt(args[1]);
-                if (port < 0 || port > 65535) {
+                if (port < 1 || port > 65535) {
                     throw new NumberFormatException();
                 } else {
                     Main.port = port;
                 }
-                System.out.println("Сервер успешно запущен!");
-                logger.log(Level.INFO,"Сервер успешно запущен!");
                 return true;
             } catch (NumberFormatException e) {
-                System.out.println("Сервер не запущен, так как указан неправильный формат порта!\n(число от 0 до 65535 должно быть передано вторым аргументом командной строки)");
-                logger.log(Level.WARNING,"Не удалось запустить сервер на порте "+args[1]+"!");
+                System.out.println("Сервер не запущен, так как указан неправильный формат порта!\n(число от 1 до 65535 должно быть передано вторым аргументом командной строки)");
+                logger.log(Level.WARNING,"Не удалось запустить сервер из-за неправильного формата порта: "+args[1]+"!");
             }
         } else {
-            System.out.println("Сервер не запущен, так как не указан порт!\n(число от 0 до 65535 должно быть передано вторым аргументом командной строки)");
+            System.out.println("Сервер не запущен, так как не указан порт!\n(число от 1 до 65535 должно быть передано вторым аргументом командной строки)");
             logger.log(Level.WARNING,"Сервер не запущен, так как не указан порт!");
         }
         return false;
@@ -135,10 +140,6 @@ public class Main {
 
     public static Date getDate() {
         return date;
-    }
-
-    public static Stack<String> getHistory() {
-        return history;
     }
 
     public static DBUnit getDBUnit() {

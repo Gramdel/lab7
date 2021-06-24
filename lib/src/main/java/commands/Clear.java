@@ -3,12 +3,13 @@ package commands;
 import collection.Organization;
 import collection.Product;
 import core.DBUnit;
+import core.Interpreter;
 
 import java.util.*;
 
 public class Clear extends Command {
     @Override
-    public boolean prepare(String arg, boolean isInteractive, HashMap<String, Command> commands) {
+    public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {
         if (!arg.matches("\\s*")) {
             System.out.println("У команды clear не может быть аргументов!");
             return false;
@@ -17,7 +18,7 @@ public class Clear extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, DBUnit dbUnit) {
         if (collection.size() > 0) {
             collection.clear();
             return "Коллекция очищена.";

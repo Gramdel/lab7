@@ -3,13 +3,14 @@ package commands;
 import collection.Organization;
 import collection.Product;
 import core.DBUnit;
+import core.Interpreter;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Info extends Command {
     @Override
-    public boolean prepare(String arg, boolean isInteractive, HashMap<String, Command> commands) {
+    public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {
         if (!arg.matches("\\s*")) {
             System.out.println("У команды info не может быть аргументов!");
             return false;
@@ -18,7 +19,7 @@ public class Info extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, DBUnit dbUnit) {
         return "Тип коллекции:\n" + collection.getClass() + "\n" + "Дата инициализации коллекции:\n" + new SimpleDateFormat("dd.MM.yyyy HH:mm").format(date) + "\n" + "Количество элементов коллекции:\n" + collection.size();
     }
 

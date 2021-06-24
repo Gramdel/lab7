@@ -3,12 +3,13 @@ package commands;
 import collection.Organization;
 import collection.Product;
 import core.DBUnit;
+import core.Interpreter;
 
 import java.util.*;
 
 public class PrintPrice extends Command {
     @Override
-    public boolean prepare(String arg, boolean isInteractive, HashMap<String, Command> commands) {
+    public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {
         if (!arg.matches("\\s*")) {
             System.out.println("У команды print_field_descending_price не может быть аргументов!");
             return false;
@@ -17,7 +18,7 @@ public class PrintPrice extends Command {
     }
 
     @Override
-    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, Stack<String> history, DBUnit dbUnit) {
+    public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, DBUnit dbUnit) {
         if (collection.size() > 0) {
             StringBuilder s = new StringBuilder();
             collection.stream().sorted(Product.byPriceComparator.reversed()).forEach(product -> s.append("\n\t").append(product.getPrice()));
