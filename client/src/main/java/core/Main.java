@@ -32,9 +32,10 @@ public class Main {
                     }
 
                     Client.setProperties(args[0], port);
+                    Client.setUser();
 
-                    System.out.println("Вас приветствует программа-клиент для управления коллекцией продуктов. Для получения списка команд введите help. \n" + "Введите команду:");
-                    InterpreterForClient interpreter = new InterpreterForClient();
+                    System.out.println("Для получения списка команд введите help. \n" + "Введите команду:");
+                    InterpreterForClient interpreter = new InterpreterForClient(Client.getUser());
                     interpreter.fromStream(System.in, true);
                 }
             } catch (NumberFormatException e) {

@@ -4,17 +4,25 @@ import collection.Organization;
 import collection.Product;
 import core.DBUnit;
 import core.Interpreter;
+import core.User;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Stack;
 
 public class ExecuteScript extends Command {
     private final Stack<String> scripts = new Stack<>();
     private String arg;
+
+    public ExecuteScript(User user) {
+        super(user);
+    }
 
     @Override
     public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {

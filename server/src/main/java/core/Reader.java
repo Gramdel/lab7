@@ -9,6 +9,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.logging.Level;
 
+import static core.Main.getDBUnit;
 import static core.Main.getLogger;
 
 public class Reader extends Thread{
@@ -33,6 +34,23 @@ public class Reader extends Thread{
             new Writer(socket, packet, command).start();
         } catch (IOException | ClassNotFoundException e) {
             getLogger().log(Level.WARNING,"Ошибка десериализации!");
+        } catch (ClassCastException e) {
+            try {
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(b);
+                ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+                User user = (User) objectInputStream.readObject();
+                getLogger().log(Level.INFO, "Успешная десериализация пользователя с именем " + user.getName() + " и паролем " + user.getPassword() + "!");
+
+                if (user.getCheckOrAdd()) {
+                    user = getDBUnit().checkUser(user);
+                } else {
+                    user = getDBUnit().addUserToDB(user);
+                }
+
+                new Writer(socket, packet, user).start();
+            } catch (IOException | ClassNotFoundException e1) {
+                getLogger().log(Level.WARNING,"Ошибка десериализации!");
+            }
         }
     }
 }

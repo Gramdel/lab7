@@ -7,13 +7,21 @@ import com.google.gson.JsonSyntaxException;
 import core.Creator;
 import core.DBUnit;
 import core.Interpreter;
+import core.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RemoveGreater extends Command {
     private Product product;
+
+    public RemoveGreater(User user) {
+        super(user);
+    }
 
     @Override
     public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {
@@ -59,13 +67,17 @@ public class RemoveGreater extends Command {
             for (Iterator<Product> iter = collection.iterator(); iter.hasNext(); ) {
                 Product product = iter.next();
                 if (this.product.getPrice() < product.getPrice()) {
-                    if (dbUnit.removeProductFromDB(product)) {
-                        if (collection.stream().filter(x -> x.getManufacturer().equals(product.getManufacturer())).count() == 1) {
-                            organizations.remove(product.getManufacturer());
+                    if (user.getName().equals("admin") || product.getUser().getName().equals(user.getName())) {
+                        if (dbUnit.removeProductFromDB(product)) {
+                            if (collection.stream().filter(x -> x.getManufacturer().equals(product.getManufacturer())).count() == 1) {
+                                organizations.remove(product.getManufacturer());
+                            }
+                            iter.remove();
+                        } else {
+                            s.append("При удалении элемента с id ").append(product.getId()).append(" произошла ошибка SQL!\n");
                         }
-                        iter.remove();
                     } else {
-                        s.append("При удалении элемента с id ").append(product.getId()).append(" произошла ошибка SQL!\n");
+                        s.append("Вы не являетесь владельцем элемента с id ").append(product.getId()).append(", поэтому у вас нет прав на его удаление!\n");
                     }
                 }
             }

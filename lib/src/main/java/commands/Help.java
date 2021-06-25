@@ -4,11 +4,19 @@ import collection.Organization;
 import collection.Product;
 import core.DBUnit;
 import core.Interpreter;
+import core.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 
 public class Help extends Command {
     private HashMap<String, Command> commands;
+
+    public Help(User user) {
+        super(user);
+    }
 
     @Override
     public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {

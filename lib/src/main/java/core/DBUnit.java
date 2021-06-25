@@ -18,8 +18,8 @@ public class DBUnit {
     private final String url;
     private final String username;
     private final String password;
-    private Connection connection;
     private final Logger logger;
+    private Connection connection;
 
     public DBUnit(String url, String username, String password, Logger logger) {
         this.url = url;
@@ -51,6 +51,7 @@ public class DBUnit {
                         organizations.add(product.getManufacturer());
                     }
                     product.setId(result.getLong(1));
+                    product.setUser(new User(result.getString(14)));
                     collection.add(product);
                 }
             }
@@ -63,7 +64,7 @@ public class DBUnit {
 
     public boolean addProductToDB(Product product) {
         try {
-            PreparedStatement statement = connection.prepareStatement("insert into lab7_collection values (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            PreparedStatement statement = connection.prepareStatement("insert into lab7_collection values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             statement.setLong(1, product.getId());
             statement.setString(2, product.getName());
             statement.setDouble(3, product.getCoordinates().getX());
@@ -89,6 +90,7 @@ public class DBUnit {
                 statement.setNull(12, NULL);
             }
             statement.setTimestamp(13, Timestamp.from(product.getCreationDate().toInstant()));
+            statement.setString(14, product.getUser().getName());
             statement.executeUpdate();
             statement.close();
             return true;
@@ -144,4 +146,48 @@ public class DBUnit {
             return false;
         }
     }
+
+    public User checkUser(User user) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("select * from lab7_users where name='" + user.getName() + "'");//+"\'and password=\'"+user.getPassword()+"\'");
+            ResultSet result = statement.executeQuery();
+            if (result.next()) {
+                if (!result.getString(2).equals(user.getPassword())) {
+                    user.setErrorId(1); // Неправильный пароль
+                }
+            } else {
+                user.setErrorId(2); // Такого пользователя не существует
+            }
+        } catch (SQLException e) {
+            logger.log(Level.WARNING, "При проверке имени пользователя (" + user.getName() + ") и пароля (" + user.getPassword() + ") возникла ошибка SQL:" + e.getMessage());
+            user.setErrorId(3); // Ошибка SQL
+        }
+        return user;
+    }
+
+    public User addUserToDB(User user) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("select * from lab7_users where name='" + user.getName() + "'");
+            ResultSet result = statement.executeQuery();
+            if (result.next()) {
+                user.setErrorId(4); // Такой пользователь уже существует
+            } else {
+                try {
+                    statement = connection.prepareStatement("insert into lab7_users values (?,?)");
+                    statement.setString(1, user.getName());
+                    statement.setString(2, user.getPassword());
+                    statement.executeUpdate();
+                    statement.close();
+                } catch (SQLException e) {
+                    logger.log(Level.WARNING, "При добавлении пользователя в базу данных возникла ошибка SQL: " + e.getMessage());
+                    user.setErrorId(3); // Ошибка SQL
+                }
+            }
+        } catch (SQLException e) {
+            logger.log(Level.WARNING, "При добавлении пользователя в базу данных возникла ошибка SQL: " + e.getMessage());
+            user.setErrorId(3); // Ошибка SQL
+        }
+        return user;
+    }
+
 }

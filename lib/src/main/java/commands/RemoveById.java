@@ -4,13 +4,21 @@ import collection.Organization;
 import collection.Product;
 import core.DBUnit;
 import core.Interpreter;
+import core.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RemoveById extends Command {
     private Long id;
+
+    public RemoveById(User user) {
+        super(user);
+    }
 
     @Override
     public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {
@@ -34,14 +42,18 @@ public class RemoveById extends Command {
     public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, DBUnit dbUnit) {
         Optional<Product> optional = collection.stream().filter(x -> x.getId().equals(id)).findFirst();
         if (optional.isPresent()) {
-            if (dbUnit.removeProductFromDB(optional.get())) {
-                collection.remove(optional.get());
-                if (collection.stream().filter(x -> x.getManufacturer().equals(optional.get().getManufacturer())).count() == 1) {
-                    organizations.remove(optional.get().getManufacturer());
+            if (user.getName().equals("admin") || optional.get().getUser().getName().equals(user.getName())) {
+                if (dbUnit.removeProductFromDB(optional.get())) {
+                    collection.remove(optional.get());
+                    if (collection.stream().filter(x -> x.getManufacturer().equals(optional.get().getManufacturer())).count() == 1) {
+                        organizations.remove(optional.get().getManufacturer());
+                    }
+                    return "Элемент с id " + id + " успешно удалён!";
+                } else {
+                    return "При удалении элемента с id " + id + " произошла ошибка SQL!";
                 }
-                return "Элемент с id " + id + " успешно удалён!";
             } else {
-                return "При удалении элемента с id " + id + " произошла ошибка SQL!";
+                return "Вы не являетесь владельцем элемента с id " + id + ", поэтому у вас нет прав на его удаление!";
             }
         } else {
             return "Удаление невозможно, так как в коллекции нет элемента с id " + id + ".";

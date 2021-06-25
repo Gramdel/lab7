@@ -7,14 +7,22 @@ import com.google.gson.JsonSyntaxException;
 import core.Creator;
 import core.DBUnit;
 import core.Interpreter;
+import core.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Update extends Command {
     private Product product;
     private Long id;
+
+    public Update(User user) {
+        super(user);
+    }
 
     @Override
     public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {
@@ -63,36 +71,43 @@ public class Update extends Command {
             System.out.println(e.getMessage());
             return false;
         }
+        product.setUser(user);
         this.product = product;
         return true;
     }
 
     @Override
     public synchronized String execute(LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, DBUnit dbUnit) {
-        if (collection.stream().noneMatch(x -> x.getId().equals(id))) {
+        Optional<Product> optional = collection.stream().filter(x -> x.getId().equals(id)).findAny();
+        if (!optional.isPresent()) {
             return "Нечего обновлять: элемента с id " + id + " нет в коллекции!";
         } else {
-            this.product.setId(id);
-            if (dbUnit.updateProductInDB(this.product)) {
-                Product product = collection.stream().filter(x -> x.getId().equals(id)).findAny().get();
-                this.product.setCreationDate(product.getCreationDate());
-                if (!product.getManufacturer().equals(this.product.getManufacturer())) {
-                    if (collection.stream().filter(x -> x.getManufacturer().equals(product.getManufacturer())).count() == 1) {
-                        organizations.remove(product.getManufacturer());
+            Product product = optional.get();
+            if (user.getName().equals("admin") || product.getUser().getName().equals(this.product.getUser().getName())) {
+                this.product.setId(id);
+                this.product.setUser(product.getUser());
+                if (dbUnit.updateProductInDB(this.product)) {
+                    this.product.setCreationDate(product.getCreationDate());
+                    if (!product.getManufacturer().equals(this.product.getManufacturer())) {
+                        if (collection.stream().filter(x -> x.getManufacturer().equals(product.getManufacturer())).count() == 1) {
+                            organizations.remove(product.getManufacturer());
+                        }
+                        Optional<Organization> optional2 = organizations.stream().filter(x -> x.equals(this.product.getManufacturer())).findAny();
+                        if (optional2.isPresent()) {
+                            this.product.setManufacturer(optional2.get());
+                        } else {
+                            this.product.getManufacturer().createId(organizations);
+                            organizations.add(product.getManufacturer());
+                        }
                     }
-                    Optional<Organization> optional = organizations.stream().filter(x -> x.equals(this.product.getManufacturer())).findAny();
-                    if (optional.isPresent()) {
-                        this.product.setManufacturer(optional.get());
-                    } else {
-                        this.product.getManufacturer().createId(organizations);
-                        organizations.add(product.getManufacturer());
-                    }
+                    collection.remove(product);
+                    collection.add(this.product);
+                    return "Элемент c id " + id + " успешно обновлён!";
+                } else {
+                    return "При обновлении элемента с id " + id + " возникла ошибка SQL!";
                 }
-                collection.remove(product);
-                collection.add(this.product);
-                return "Элемент c id " + id + " успешно обновлён!";
             } else {
-                return "При обновлении элемента с id " + id + " возникла ошибка SQL!";
+                return "Вы не являетесь владельцем элемента с id " + id + ", поэтому у вас нет прав на его изменение!";
             }
         }
     }

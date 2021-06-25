@@ -7,13 +7,20 @@ import com.google.gson.JsonSyntaxException;
 import core.Creator;
 import core.DBUnit;
 import core.Interpreter;
+import core.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FilterByManufacturer extends Command {
     private Organization manufacturer;
+
+    public FilterByManufacturer(User user) {
+        super(user);
+    }
 
     @Override
     public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {

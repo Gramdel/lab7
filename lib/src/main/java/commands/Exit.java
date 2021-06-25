@@ -1,10 +1,13 @@
 package commands;
 
 import core.Interpreter;
-
-import java.util.*;
+import core.User;
 
 public class Exit extends Command {
+    public Exit(User user) {
+        super(user);
+    }
+
     @Override
     public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {
         if (!arg.matches("\\s*")) {

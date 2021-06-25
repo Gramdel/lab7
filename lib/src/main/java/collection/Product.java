@@ -1,5 +1,7 @@
 package collection;
 
+import core.User;
+
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -21,6 +23,7 @@ public class Product implements Comparable<Product>, Serializable {
     private final String partNumber; //Значение этого поля должно быть уникальным, Поле не может быть null
     private final Float manufactureCost; //Поле не может быть null
     private final UnitOfMeasure unitOfMeasure; //Поле не может быть null
+    private User user;
     private Long id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private java.time.ZonedDateTime creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
     private Organization manufacturer; //Поле может быть null
@@ -48,6 +51,7 @@ public class Product implements Comparable<Product>, Serializable {
                 "\tmanufactureCost = " + manufactureCost + ",\n" +
                 "\tunitOfMeasure = " + unitOfMeasure + ",\n" +
                 "\tmanufacturer = " + manufacturer + "\n" +
+                "\towner = " + user.getName() + "\n" +
                 "}";
     }
 
@@ -110,5 +114,13 @@ public class Product implements Comparable<Product>, Serializable {
 
     public Float getManufactureCost() {
         return manufactureCost;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

@@ -4,11 +4,19 @@ import collection.Organization;
 import collection.Product;
 import core.DBUnit;
 import core.Interpreter;
+import core.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Stack;
 
 public class History extends Command {
     private Stack<String> history;
+
+    public History(User user) {
+        super(user);
+    }
 
     @Override
     public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {

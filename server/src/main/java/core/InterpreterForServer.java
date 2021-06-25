@@ -15,7 +15,8 @@ public class InterpreterForServer extends Interpreter {
     private final Date date;
     private final DBUnit dbUnit;
 
-    public InterpreterForServer (LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, DBUnit dbUnit) {
+    public InterpreterForServer (LinkedHashSet<Product> collection, ArrayList<Organization> organizations, Date date, DBUnit dbUnit, User user) {
+        super(user);
         this.collection = collection;
         this.organizations = organizations;
         this.date = date;

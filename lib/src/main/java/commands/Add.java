@@ -7,13 +7,21 @@ import com.google.gson.JsonSyntaxException;
 import core.Creator;
 import core.DBUnit;
 import core.Interpreter;
+import core.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Add extends Command {
     private Product product;
+
+    public Add(User user) {
+        super(user);
+    }
 
     @Override
     public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {
@@ -45,6 +53,7 @@ public class Add extends Command {
             System.out.println(e.getMessage());
             return false;
         }
+        product.setUser(user);
         this.product = product;
         return true;
     }

@@ -4,11 +4,18 @@ import collection.Organization;
 import collection.Product;
 import core.DBUnit;
 import core.Interpreter;
+import core.User;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashSet;
 
 public class Info extends Command {
+    public Info(User user) {
+        super(user);
+    }
+
     @Override
     public boolean prepare(String arg, boolean isInteractive, Interpreter interpreter) {
         if (!arg.matches("\\s*")) {

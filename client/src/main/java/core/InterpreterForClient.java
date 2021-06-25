@@ -8,6 +8,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class InterpreterForClient extends Interpreter {
+    public InterpreterForClient(User user) {
+        super(user);
+    }
+
     public void fromStream(InputStream stream, boolean isInteractive) {
         Scanner in = new Scanner(stream);
         while (in.hasNext()) {
@@ -28,7 +32,7 @@ public class InterpreterForClient extends Interpreter {
                 Command command = commands.get(com);
                 if (command != null) {
                     if (command.prepare(arg, isInteractive, this)) {
-                        Client.send(command);
+                        Client.sendCommandAndReceiveResult(command);
                     }
                 } else {
                     System.out.println("Такой команды не существует! Список команд: help");
